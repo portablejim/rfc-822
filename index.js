@@ -5,6 +5,16 @@ function addLeadingZero(num) {
   return num;
 }
 
+function getInverseOffset(timezoneOffset) {
+  const minutes = Math.abs(timezoneOffset % 60).toFixed(0).padStart(2, 0);
+  const hours = Math.abs(Math.floor(timezoneOffset / 60)).toFixed(0).padStart(2, 0);
+    //
+  // Reverse the sign
+  const modifier = timezoneOffset < 0 ? '+' : '-';
+
+  return `${modifier}${hours}${minutes}`
+}
+
 function buildRFC822Date(dateString) {
   const dayStrings = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthStrings = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -17,7 +27,7 @@ function buildRFC822Date(dateString) {
   const month = monthStrings[date.getMonth()];
   const year = date.getFullYear();
   const time = `${addLeadingZero(date.getHours())}:${addLeadingZero(date.getMinutes())}:00`;
-  const timezone = date.getTimezoneOffset() === 0 ? "GMT" : "BST";
+  const timezone = date.getTimezoneOffset() === 0 ? "GMT" : getInverseOffset(date.getTimezoneOffset());
 
   //Wed, 02 Oct 2002 13:00:00 GMT
   return `${day}, ${dayNumber} ${month} ${year} ${time} ${timezone}`;
