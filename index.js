@@ -5,11 +5,24 @@ function addLeadingZero(num) {
   return num;
 }
 
-function getInverseOffset(timezoneOffset) {
+function getInverseOffset(date) {
+  timezoneOffset = date.getTimezoneOffset();
+  // Calculate USA timezones.
+  // Check against known offsets to avoid TZ lookup where possible.
+  const canBeUSA = [4 * 60, 5 * 60, 6 * 60, 7 * 60, 8 * 60].includes(timezoneOffset);
+  if (canBeUSA) {
+    // Note: Date-dependant and so cannot be mapped from offsets.
+    const shortZoneName = date.toLocaleTimeString('en-US',{timeZoneName:'short'});
+    // Check for RFC 822 timezones.
+    if (["EST", "EDT", "CST", "CDT", "MST", "MDT", "PST", "PDT"].includes(shortZoneName)) {
+      return shortZoneName;
+    }
+  }
+
+  // Split hours and minutes for -HHMM / +HHMM formatting
   const minutes = Math.abs(timezoneOffset % 60).toFixed(0).padStart(2, 0);
   const hours = Math.abs(Math.floor(timezoneOffset / 60)).toFixed(0).padStart(2, 0);
-    //
-  // Reverse the sign
+  // Reverse the sign to get offset from GMT/UTC
   const modifier = timezoneOffset < 0 ? '+' : '-';
 
   return `${modifier}${hours}${minutes}`
@@ -27,7 +40,7 @@ function buildRFC822Date(dateString) {
   const month = monthStrings[date.getMonth()];
   const year = date.getFullYear();
   const time = `${addLeadingZero(date.getHours())}:${addLeadingZero(date.getMinutes())}:00`;
-  const timezone = date.getTimezoneOffset() === 0 ? "GMT" : getInverseOffset(date.getTimezoneOffset());
+  const timezone = date.getTimezoneOffset() === 0 ? "GMT" : getInverseOffset(date);
 
   //Wed, 02 Oct 2002 13:00:00 GMT
   return `${day}, ${dayNumber} ${month} ${year} ${time} ${timezone}`;
